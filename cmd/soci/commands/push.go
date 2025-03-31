@@ -133,6 +133,8 @@ if they are available in the snapshotter's local content store.
 			}
 		}
 
+		fmt.Println("using credentials: ", username, " / ", secret)
+
 		authClient.Credential = func(_ context.Context, host string) (auth.Credential, error) {
 			return auth.Credential{
 				Username: username,
