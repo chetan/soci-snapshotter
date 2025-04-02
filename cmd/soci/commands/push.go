@@ -128,7 +128,15 @@ if they are available in the snapshotter's local content store.
 			cf := dockercliconfig.LoadDefaultConfigFile(io.Discard)
 			fmt.Println("using docker config file:", cf.GetFilename())
 			if cf.ContainsAuth() {
+        if ac, err := cf.GetAuthConfig(refspec.Hostname()+":443"); err == nil {
+          fmt.Println("443:")
+					fmt.Printf("ac: %+v\n", ac)
+					fmt.Println("found auth", ac.Auth)
+        }
 				if ac, err := cf.GetAuthConfig(refspec.Hostname()); err == nil {
+          fmt.Println("no 443:")
+					fmt.Printf("ac: %+v\n", ac)
+					fmt.Println("found auth", ac.Auth)
 					username = ac.Username
 					secret = ac.Password
 				} else {
