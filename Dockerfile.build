@@ -24,6 +24,7 @@ FROM ubuntu:20.04 AS containerd-snapshotter-base
 ARG CONTAINERD_VERSION
 ARG RUNC_VERSION
 ARG NERDCTL_VERSION
+ARG GO_VERSION
 ARG TARGETARCH
 ENV GOPROXY direct
 ENV GOCOVERDIR /test_coverage
@@ -58,10 +59,8 @@ RUN mkdir -p /etc/apt/keyrings && \
     && apt-get update \
     && apt-get install -y docker-ce-cli
 
-# install latest golang from release
-RUN curl -sSL --output /tmp/go.tgz https://dl.google.com/go/go${GO_VERSION}.linux-${TARGETARCH:-amd64}.tar.gz && \
-    tar -C /usr/local -xzf /tmp/go.tgz && \
-    rm -f /tmp/go.tgz
+RUN curl -sL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz | tar -C /usr/local -xz
+ENV PATH="/usr/local/go/bin:${PATH}"
 
 RUN curl -sSL --output /tmp/containerd.tgz https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-${TARGETARCH:-amd64}.tar.gz && \
     tar zxvf /tmp/containerd.tgz -C /usr/local/ && \
