@@ -124,12 +124,18 @@ if they are available in the snapshotter's local content store.
 				username = username[0:i]
 			}
 		} else {
+			fmt.Println("looking for auth for hostname ", refspec.Hostname())
 			cf := dockercliconfig.LoadDefaultConfigFile(io.Discard)
+			fmt.Println("using docker config file:", cf.GetFilename())
 			if cf.ContainsAuth() {
 				if ac, err := cf.GetAuthConfig(refspec.Hostname()); err == nil {
 					username = ac.Username
 					secret = ac.Password
+				} else {
+					fmt.Println("no auth config for hostname:", refspec.Hostname())
 				}
+			} else {
+				fmt.Println("no auth config found in docker config file")
 			}
 		}
 
