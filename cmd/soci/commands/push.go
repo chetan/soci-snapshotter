@@ -128,13 +128,8 @@ if they are available in the snapshotter's local content store.
 			cf := dockercliconfig.LoadDefaultConfigFile(io.Discard)
 			fmt.Println("using docker config file:", cf.GetFilename())
 			if cf.ContainsAuth() {
-        if ac, err := cf.GetAuthConfig(refspec.Hostname()+":443"); err == nil {
-          fmt.Println("443:")
-					fmt.Printf("ac: %+v\n", ac)
-					fmt.Println("found auth", ac.Auth)
-        }
 				if ac, err := cf.GetAuthConfig(refspec.Hostname()); err == nil {
-          fmt.Println("no 443:")
+					fmt.Println("no 443:")
 					fmt.Printf("ac: %+v\n", ac)
 					fmt.Println("found auth", ac.Auth)
 					username = ac.Username
@@ -142,12 +137,22 @@ if they are available in the snapshotter's local content store.
 				} else {
 					fmt.Println("no auth config for hostname:", refspec.Hostname())
 				}
+				if username == "" {
+					// try appending :443
+					if ac, err := cf.GetAuthConfig(refspec.Hostname() + ":443"); err == nil {
+						username = ac.Username
+						secret = ac.Password
+					}
+				}
 			} else {
 				fmt.Println("no auth config found in docker config file")
 			}
 		}
 
 		fmt.Println("using credentials: ", username, " / ", secret)
+		if username == "" || secret == "" {
+			fmt.Println("warning: no credentials found for hostname", refspec.Hostname())
+		}
 
 		authClient.Credential = func(_ context.Context, host string) (auth.Credential, error) {
 			return auth.Credential{
