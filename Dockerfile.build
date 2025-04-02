@@ -18,7 +18,7 @@ ARG NERDCTL_VERSION=1.7.1
 
 FROM public.ecr.aws/docker/library/registry:3.0.0-alpha.1 AS registry
 
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS containerd-snapshotter-base
+FROM ubuntu:20.04 AS containerd-snapshotter-base
 
 ARG CONTAINERD_VERSION
 ARG RUNC_VERSION
@@ -29,9 +29,10 @@ ENV GOCOVERDIR /test_coverage
 
 COPY ./integ_entrypoint.sh /integ_entrypoint.sh
 
-#COPY . $GOPATH/src/github.com/awslabs/soci-snapshotter
-
-RUN dnf update && dnf upgrade && dnf install -y \
+# Update and install required packages for Ubuntu
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
+    build-essential \
+    curl \
     diffutils \
     findutils \
     gzip \
@@ -40,8 +41,11 @@ RUN dnf update && dnf upgrade && dnf install -y \
     procps \
     systemd \
     tar \
-    util-linux-core \
-    golang zlib-devel zlib-static
+    util-linux \
+    golang \
+    zlib1g-dev \
+    zlib1g
+
 RUN curl -sSL --output /tmp/containerd.tgz https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-${TARGETARCH:-amd64}.tar.gz && \
     tar zxvf /tmp/containerd.tgz -C /usr/local/ && \
     rm -f /tmp/containerd.tgz
