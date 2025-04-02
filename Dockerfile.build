@@ -15,6 +15,7 @@
 ARG CONTAINERD_VERSION=1.6.36
 ARG RUNC_VERSION=1.2.5
 ARG NERDCTL_VERSION=1.7.1
+ARG GO_VERSION=1.24.2
 
 FROM public.ecr.aws/docker/library/registry:3.0.0-alpha.1 AS registry
 
@@ -43,7 +44,6 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     systemd \
     tar \
     util-linux \
-    golang \
     zlib1g-dev \
     zlib1g \
     git
@@ -57,6 +57,11 @@ RUN mkdir -p /etc/apt/keyrings && \
       tee /etc/apt/sources.list.d/docker.list > /dev/null \
     && apt-get update \
     && apt-get install -y docker-ce-cli
+
+# install latest golang from release
+RUN curl -sSL --output /tmp/go.tgz https://dl.google.com/go/go${GO_VERSION}.linux-${TARGETARCH:-amd64}.tar.gz && \
+    tar -C /usr/local -xzf /tmp/go.tgz && \
+    rm -f /tmp/go.tgz
 
 RUN curl -sSL --output /tmp/containerd.tgz https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-${TARGETARCH:-amd64}.tar.gz && \
     tar zxvf /tmp/containerd.tgz -C /usr/local/ && \
